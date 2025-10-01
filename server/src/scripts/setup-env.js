@@ -36,6 +36,7 @@ async function main() {
     PORT: '4000',
     CLIENT_ORIGIN: 'http://localhost:5173',
     JWT_SECRET: 'dev-secret',
+    JWT_EXPIRES_IN: '7d',
     POSTGRES_HOST: '127.0.0.1',
     POSTGRES_PORT: '5433',
     POSTGRES_DB: 'books_db',
@@ -47,6 +48,7 @@ async function main() {
   const PORT = USE_DEFAULTS ? defaults.PORT : await ask('Server PORT', defaults.PORT);
   const CLIENT_ORIGIN = USE_DEFAULTS ? defaults.CLIENT_ORIGIN : await ask('Client origin', defaults.CLIENT_ORIGIN);
   const JWT_SECRET = USE_DEFAULTS ? defaults.JWT_SECRET : await ask('JWT secret', defaults.JWT_SECRET);
+  const JWT_EXPIRES_IN = USE_DEFAULTS ? defaults.JWT_EXPIRES_IN : await ask('JWT expires in (e.g. 7d, 24h)', defaults.JWT_EXPIRES_IN);
 
   const POSTGRES_HOST = USE_DEFAULTS ? defaults.POSTGRES_HOST : await ask('Postgres host', defaults.POSTGRES_HOST);
   const POSTGRES_PORT = USE_DEFAULTS ? defaults.POSTGRES_PORT : await ask('Postgres port', defaults.POSTGRES_PORT);
@@ -60,6 +62,7 @@ async function main() {
     `PORT=${PORT}`,
     `CLIENT_ORIGIN=${CLIENT_ORIGIN}`,
     `JWT_SECRET=${JWT_SECRET}`,
+    `JWT_EXPIRES_IN=${JWT_EXPIRES_IN}`,
     `POSTGRES_HOST=${POSTGRES_HOST}`,
     `POSTGRES_PORT=${POSTGRES_PORT}`,
     `POSTGRES_DB=${POSTGRES_DB}`,

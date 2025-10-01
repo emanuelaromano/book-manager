@@ -14,6 +14,12 @@ export default async function booksRoutes(app) {
     const userId = request.user.sub;
     const { title, author, year, rating, notes } = request.body || {};
     if (!title) return reply.code(400).send({ message: 'Title is required' });
+    if (year != null) {
+      const numericYear = Number(year);
+      const currentYear = new Date().getFullYear();
+      if (isNaN(numericYear)) return reply.code(400).send({ message: 'Year must be a number' });
+      if (numericYear > currentYear) return reply.code(400).send({ message: 'Year cannot be in the future' });
+    }
     const normalizedTitle = String(title).trim().toLowerCase();
     const normalizedAuthor = author != null && String(author).trim() !== '' ? String(author).trim().toLowerCase() : null;
 
@@ -48,6 +54,12 @@ export default async function booksRoutes(app) {
     const nextTitle = title ?? book.title;
     const nextAuthorRaw = author === undefined ? book.author : author;
     const nextYear = year === undefined ? book.year : year;
+    if (nextYear != null) {
+      const numericYear = Number(nextYear);
+      const currentYear = new Date().getFullYear();
+      if (isNaN(numericYear)) return reply.code(400).send({ message: 'Year must be a number' });
+      if (numericYear > currentYear) return reply.code(400).send({ message: 'Year cannot be in the future' });
+    }
     let nextRating;
     if (rating === undefined) {
       nextRating = book.rating;

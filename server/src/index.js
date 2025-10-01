@@ -24,6 +24,7 @@ async function buildServer() {
   });
   await app.register(jwt, {
     secret: process.env.JWT_SECRET || 'dev-secret',
+    sign: { expiresIn: process.env.JWT_EXPIRES_IN || '7d' },
     cookie: {
       cookieName: 'token',
       signed: false

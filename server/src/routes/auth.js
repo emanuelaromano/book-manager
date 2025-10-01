@@ -20,7 +20,8 @@ export default async function authRoutes(app) {
         httpOnly: true,
         sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production',
-        path: '/'
+        path: '/',
+        maxAge: parseMaxAge(process.env.JWT_EXPIRES_IN || '7d')
       })
       .send({ id: user.id, email: user.email });
   });
@@ -41,7 +42,8 @@ export default async function authRoutes(app) {
         httpOnly: true,
         sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production',
-        path: '/'
+        path: '/',
+        maxAge: parseMaxAge(process.env.JWT_EXPIRES_IN || '7d')
       })
       .send({ id: user.id, email: user.email });
   });
@@ -57,6 +59,27 @@ export default async function authRoutes(app) {
     const user = await models.User.findByPk(userId, { attributes: ['id', 'email'] });
     return user || {};
   });
+}
+
+function parseMaxAge(str) {
+  // supports e.g. "7d", "24h", "3600" seconds
+  const s = String(str).trim();
+  const m = s.match(/^(\d+)([smhd])?$/i);
+  if (!m) return 7 * 24 * 60 * 60; // default 7d
+  const value = Number(m[1]);
+  const unit = (m[2] || 's').toLowerCase();
+  switch (unit) {
+    case 's':
+      return value;
+    case 'm':
+      return value * 60;
+    case 'h':
+      return value * 60 * 60;
+    case 'd':
+      return value * 24 * 60 * 60;
+    default:
+      return value;
+  }
 }
 
 

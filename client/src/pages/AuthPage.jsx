@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { Box, Button, Container, FormControl, FormLabel, Heading, Input, Stack, Text, useToast } from '@chakra-ui/react';
+import { Box, Button, Container, FormControl, FormLabel, Heading, Input, Stack, Text, InputGroup, InputRightElement, IconButton, useToast } from '@chakra-ui/react';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import Layout from '../components/Layout.jsx';
 import { useNavigate } from 'react-router-dom';
 
 export default function AuthPage() {
   const [mode, setMode] = useState('login');
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -42,11 +44,28 @@ export default function AuthPage() {
             <Stack spacing={4}>
               <FormControl>
                 <FormLabel>Email</FormLabel>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </FormControl>
               <FormControl>
                 <FormLabel>Password</FormLabel>
-                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                <InputGroup>
+                  <Input 
+                    type={showPassword ? 'text' : 'password'} 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required 
+                    minLength={6} 
+                  />
+                  <InputRightElement>
+                    <IconButton
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      icon={showPassword ? <ViewIcon /> : <ViewOffIcon />}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowPassword(!showPassword)}
+                    />
+                  </InputRightElement>
+                </InputGroup>
               </FormControl>
               <Button isLoading={loading} colorScheme="blue" onClick={submit} rounded="full">
                 {mode === 'login' ? 'Sign in' : 'Create account'}

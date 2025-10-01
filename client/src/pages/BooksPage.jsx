@@ -190,15 +190,22 @@ export default function BooksPage() {
       toast({ title: 'Title is required', status: 'warning' });
       return;
     }
+    const currentYear = new Date().getFullYear();
+    if (form.year) {
+      const numericYear = Number(form.year);
+      if (Number.isNaN(numericYear)) {
+        toast({ title: 'Year must be a number', status: 'warning' });
+        return;
+      }
+      if (numericYear > currentYear) {
+        toast({ title: 'Year cannot be in the future', status: 'warning' });
+        return;
+      }
+    }
     const payload = { title: form.title.trim(), author: form.author || null, year: form.year ? Number(form.year) : null, rating: form.rating ? Number(form.rating) : null, notes: form.notes || null };
     if (form.id) await updateMutation.mutateAsync({ id: form.id, ...payload });
     else await createMutation.mutateAsync(payload);
     onClose();
-  }
-
-  async function logout() {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-    navigate('/auth');
   }
 
   return (
@@ -217,7 +224,7 @@ export default function BooksPage() {
             </Center>
           ) : (
           <>
-          <Box p={3} borderBottom="1px" borderColor="gray.100" bg="white">
+          {displayedBooks.length > 0 && <Box p={3} borderBottom="1px" borderColor="gray.100" bg="white">
             <Input
               placeholder="Filter books..."
               value={filter}
@@ -226,7 +233,7 @@ export default function BooksPage() {
               w="100%"
               bg="white"
             />
-          </Box>
+          </Box>}
           <Table size="sm" variant="notion">
             <Thead>
               <Tr>
@@ -309,7 +316,7 @@ export default function BooksPage() {
                 </FormControl>
                 <FormControl>
                   <FormLabel>Year</FormLabel>
-                  <Input type="number" value={form.year} onChange={(e) => setForm((f) => ({ ...f, year: e.target.value }))} />
+                  <Input type="number" max={new Date().getFullYear()} value={form.year} onChange={(e) => setForm((f) => ({ ...f, year: e.target.value }))} />
                 </FormControl>
                 <FormControl>
                   <FormLabel>Rating</FormLabel>
