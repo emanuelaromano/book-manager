@@ -17,6 +17,7 @@ Prerequisites:
 - Docker (for Postgres)
 
 At repo root, run:
+
 _Install dependencies for server and client_
 ```bash
 npm run deps
