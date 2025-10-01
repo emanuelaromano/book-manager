@@ -98,9 +98,9 @@ export default function BooksPage() {
       qc.setQueryData(['books'], (old = []) => [optimistic, ...old]);
       return { prev };
     },
-    onError: (_err, _vars, ctx) => {
+    onError: (err, _vars, ctx) => {
       if (ctx?.prev) qc.setQueryData(['books'], ctx.prev);
-      toast({ title: 'Create failed', status: 'error' });
+      toast({ title: err?.message || 'Create failed', status: 'error' });
     },
     onSuccess: () => {
       toast({ title: 'Book added', status: 'success' });

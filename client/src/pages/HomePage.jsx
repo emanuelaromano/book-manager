@@ -6,9 +6,9 @@ import handWriting from '../assets/hand_writing.png';
 export default function HomePage() {
   return (
     <Layout>
-      <Box py={{ base: 18, md: 28 }}>
+      <Box pt={{ base: 20, md: 28 }} pb={{ base: 8, md: 12 }}>
         <Container>
-          <Stack spacing={6} align="center" textAlign="center">
+          <Stack spacing={8} align="center" textAlign="center">
             <Heading size="2xl" letterSpacing="-0.04em" lineHeight={1.05}>
               Your library, simply organized
             </Heading>
@@ -17,14 +17,11 @@ export default function HomePage() {
             </Text>
             <Stack direction={{ base: 'column', sm: 'row' }} spacing={4}>
               <Button as={Link} to="/books" size="lg">
-                View Books
-              </Button>
-              <Button as={Link} to="/auth" variant="ghost" size="lg">
-                Sign in / Register
+                Manage Your Library
               </Button>
             </Stack>
-            <Box pt={{ base: 8, md: 10 }} w="100%" display="flex" justifyContent="center">
-              <Image src={handWriting} alt="Hand writing illustration" maxW={{ base: '90%', md: '800px' }} opacity={0.9} />
+            <Box pt={{ base: 6, md: 8 }} w="100%" display="flex" justifyContent="center">
+              <Image src={handWriting} alt="Hand writing illustration" maxW={{ base: '80%', md: '700px' }} opacity={0.9} />
             </Box>
           </Stack>
         </Container>

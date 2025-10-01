@@ -27,7 +27,7 @@ export default async function booksRoutes(app) {
     };
 
     const existing = await models.Book.findOne({ where: duplicateWhere });
-    if (existing) return reply.code(409).send({ message: 'Duplicate book exists' });
+    if (existing) return reply.code(409).send({ message: 'A book with the same title, author, and year already exists.' });
 
     const book = await models.Book.create({ title, author: normalizedAuthor ?? null, year: year ?? null, notes, userId });
     return book;
@@ -56,7 +56,7 @@ export default async function booksRoutes(app) {
         ]
       };
       const dup = await models.Book.findOne({ where: dupWhere });
-      if (dup) return reply.code(409).send({ message: 'Duplicate book exists' });
+      if (dup) return reply.code(409).send({ message: 'A book with the same title, author, and year already exists.' });
     }
 
     await book.update({ title: nextTitle, author: nextAuthor, year: nextYear, notes });
