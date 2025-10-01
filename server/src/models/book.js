@@ -13,7 +13,13 @@ export function defineBookModel(sequelize) {
     },
     {
       tableName: 'books',
-      timestamps: true
+      timestamps: true,
+      indexes: [
+        {
+          unique: true,
+          fields: ['userId', 'title', 'author', 'year']
+        }
+      ]
     }
   );
 

@@ -31,25 +31,31 @@ export default function Layout({ children, mainProps = {} }) {
 
   return (
     <Flex direction="column" minH="100dvh">
-      <Box position="sticky" top={0} zIndex={10} backdropFilter="saturate(180%) blur(14px)" bg="rgba(255,255,255,0.7)" borderBottomWidth="1px">
-        <Container py={4} maxW="6xl">
+      <Box position="sticky" top={0} zIndex={10} bg="white" borderBottomWidth="1px">
+        <Container py={3}>
           <Flex align="center" justify="space-between">
-            <HStack spacing={6}>
-              <ChakraLink as={Link} to="/" fontWeight="semibold" letterSpacing="-0.02em">
+            <HStack spacing={4}>
+              <ChakraLink
+                as={Link}
+                to="/"
+                fontWeight="semibold"
+                letterSpacing="-0.02em"
+                fontSize={{ base: 'md', md: 'lg' }}
+                color="gray.800"
+                _hover={{ textDecoration: 'none', color: 'black' }}
+              >
                 Book Manager
               </ChakraLink>
-              {!isAuthPage && isAuthenticated && (
-                <ChakraLink as={Link} to="/books" color="gray.600" _hover={{ color: 'gray.900' }}>
-                  Books
-                </ChakraLink>
-              )}
             </HStack>
             <HStack>
               {!isAuthPage && isAuthenticated && (
-                <Button size="sm" variant="ghost" onClick={logout}>Logout</Button>
+                <>
+                  <Button size="sm" as={Link} to="/books" variant="ghost">Books</Button>
+                  <Button size="sm" variant="ghost" onClick={logout}>Logout</Button>
+                </>
               )}
               {(isAuthPage || isAuthenticated === false) && (
-                <Button size="sm" as={Link} to="/auth" colorScheme="blue">Enter</Button>
+                <Button size="sm" as={Link} to="/auth">Enter</Button>
               )}
             </HStack>
           </Flex>
@@ -59,10 +65,10 @@ export default function Layout({ children, mainProps = {} }) {
       <Box as="main" flex="1 1 auto" {...mainProps}>{children}</Box>
 
       <Box as="footer" borderTopWidth="1px" bg="white">
-        <Container py={4}>
+        <Container py={3}>
           <Flex align="center" justify="space-between">
-            <Text color="gray.500">© {new Date().getFullYear()} Book Manager</Text>
-            <HStack spacing={6} color="gray.500">
+            <Text color="gray.500" fontSize="sm">© {new Date().getFullYear()} Book Manager</Text>
+            <HStack spacing={6} color="gray.500" fontSize="sm">
               <ChakraLink href="#">Privacy</ChakraLink>
               <ChakraLink href="#">Terms</ChakraLink>
             </HStack>

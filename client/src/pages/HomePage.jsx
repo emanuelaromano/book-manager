@@ -1,31 +1,30 @@
 import { Box, Button, Container, Heading, Stack, Text, Image } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout.jsx';
+import handWriting from '../assets/hand_writing.png';
 
 export default function HomePage() {
   return (
-    <Layout mainProps={{ bgGradient: 'linear(to-b, white, gray.50)' }}>
-      <Box py={{ base: 16, md: 24 }}>
+    <Layout>
+      <Box py={{ base: 18, md: 28 }}>
         <Container>
-          <Stack direction={{ base: 'column', md: 'row' }} spacing={12} align="center">
-            <Stack spacing={6} maxW="xl">
-              <Heading size="2xl" letterSpacing="-0.04em" lineHeight={1.05}>
-                Organize your library with effortless elegance
-              </Heading>
-              <Text fontSize={{ base: 'lg', md: 'xl' }} color="gray.600">
-                A minimalist book manager inspired by the clarity and polish of Apple design.
-              </Text>
-              <Stack direction={{ base: 'column', sm: 'row' }} spacing={4}>
-                <Button as={Link} to="/books" colorScheme="blue" size="lg">
-                  View Books
-                </Button>
-                <Button as={Link} to="/auth" variant="outline" size="lg">
-                  Sign in / Register
-                </Button>
-              </Stack>
+          <Stack spacing={6} align="center" textAlign="center">
+            <Heading size="2xl" letterSpacing="-0.04em" lineHeight={1.05}>
+              Your library, simply organized
+            </Heading>
+            <Text fontSize={{ base: 'lg', md: 'xl' }} color="gray.600" maxW="2xl">
+              A minimalist book manager inspired by Notion’s calm, focused workspace.
+            </Text>
+            <Stack direction={{ base: 'column', sm: 'row' }} spacing={4}>
+              <Button as={Link} to="/books" size="lg">
+                View Books
+              </Button>
+              <Button as={Link} to="/auth" variant="ghost" size="lg">
+                Sign in / Register
+              </Button>
             </Stack>
-            <Box shadow="soft" rounded="2xl" overflow="hidden">
-              <Image src="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1600&auto=format&fit=crop" alt="Books hero" maxW={{ base: '100%', md: '520px' }} />
+            <Box pt={{ base: 8, md: 10 }} w="100%" display="flex" justifyContent="center">
+              <Image src={handWriting} alt="Hand writing illustration" maxW={{ base: '90%', md: '800px' }} opacity={0.9} />
             </Box>
           </Stack>
         </Container>

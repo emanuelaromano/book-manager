@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Box,
   Button,
@@ -24,10 +24,12 @@ import {
   Td,
   useDisclosure,
   useToast,
-  Stack
+  Stack,
+  Spinner,
+  Center
 } from '@chakra-ui/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { DeleteIcon, EditIcon, TriangleDownIcon, TriangleUpIcon } from '@chakra-ui/icons';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout.jsx';
 
@@ -40,11 +42,43 @@ async function fetchBooks() {
 export default function BooksPage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [form, setForm] = useState({ id: null, title: '', author: '', year: '', notes: '' });
+  const [sort, setSort] = useState({ key: null, dir: 'asc' });
   const toast = useToast();
   const qc = useQueryClient();
   const navigate = useNavigate();
 
   const { data: books = [], isLoading } = useQuery({ queryKey: ['books'], queryFn: fetchBooks });
+
+  function toggleSort(key) {
+    setSort((prev) => {
+      if (prev.key === key) {
+        return { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' };
+      }
+      return { key, dir: 'asc' };
+    });
+  }
+
+  const sortedBooks = useMemo(() => {
+    const copy = [...books];
+    if (!sort.key) return copy;
+    const { key, dir } = sort;
+    copy.sort((a, b) => {
+      const av = a[key];
+      const bv = b[key];
+      if (av == null && bv == null) return 0;
+      if (av == null) return dir === 'asc' ? 1 : -1;
+      if (bv == null) return dir === 'asc' ? -1 : 1;
+      if (typeof av === 'number' && typeof bv === 'number') {
+        return dir === 'asc' ? av - bv : bv - av;
+      }
+      const as = String(av).toLowerCase();
+      const bs = String(bv).toLowerCase();
+      if (as < bs) return dir === 'asc' ? -1 : 1;
+      if (as > bs) return dir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return copy;
+  }, [books, sort]);
 
   const createMutation = useMutation({
     mutationFn: async (payload) => {
@@ -145,39 +179,67 @@ export default function BooksPage() {
 
   return (
     <Layout>
-      <Container maxW="5xl" py={10}>
-        <Stack direction="row" justify="space-between" align="center" mb={6}>
-          <Heading letterSpacing="-0.02em">My Books</Heading>
+      <Container py={8}>
+        <Stack direction="row" justify="space-between" align="center" mb={4}>
+          <Heading size="md" letterSpacing="-0.02em" color="gray.800">My Books</Heading>
           <Stack direction="row">
-            <Button onClick={openCreate} colorScheme="blue" rounded="full">Add Book</Button>
+            <Button onClick={openCreate}>Add Book</Button>
           </Stack>
         </Stack>
-        <Box borderWidth="1px" rounded="xl" overflowX="auto" bg="white">
-          <Table size="sm">
-            <Thead bg="gray.50">
+        <Box borderWidth="1px" rounded="md" overflowX="auto" bg="white" boxShadow="page">
+          {isLoading ? (
+            <Center py={10}>
+              <Spinner />
+            </Center>
+          ) : (
+          <Table size="sm" variant="notion">
+            <Thead>
               <Tr>
-                <Th>Title</Th>
-                <Th>Author</Th>
-                <Th>Year</Th>
-                <Th>Notes</Th>
+                <Th aria-sort={sort.key === 'title' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+                  <Button variant="ghost" size="xs" onClick={() => toggleSort('title')} rightIcon={sort.key === 'title' ? (sort.dir === 'asc' ? <TriangleUpIcon /> : <TriangleDownIcon />) : undefined}>
+                    Title
+                  </Button>
+                </Th>
+                <Th aria-sort={sort.key === 'author' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+                  <Button variant="ghost" size="xs" onClick={() => toggleSort('author')} rightIcon={sort.key === 'author' ? (sort.dir === 'asc' ? <TriangleUpIcon /> : <TriangleDownIcon />) : undefined}>
+                    Author
+                  </Button>
+                </Th>
+                <Th aria-sort={sort.key === 'year' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+                  <Button variant="ghost" size="xs" onClick={() => toggleSort('year')} rightIcon={sort.key === 'year' ? (sort.dir === 'asc' ? <TriangleUpIcon /> : <TriangleDownIcon />) : undefined}>
+                    Year
+                  </Button>
+                </Th>
+                <Th aria-sort={sort.key === 'notes' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+                  <Button variant="ghost" size="xs" onClick={() => toggleSort('notes')} rightIcon={sort.key === 'notes' ? (sort.dir === 'asc' ? <TriangleUpIcon /> : <TriangleDownIcon />) : undefined}>
+                    Notes
+                  </Button>
+                </Th>
+                <Th aria-sort={sort.key === 'createdAt' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+                  <Button variant="ghost" size="xs" onClick={() => toggleSort('createdAt')} rightIcon={sort.key === 'createdAt' ? (sort.dir === 'asc' ? <TriangleUpIcon /> : <TriangleDownIcon />) : undefined}>
+                    Added
+                  </Button>
+                </Th>
                 <Th></Th>
               </Tr>
             </Thead>
             <Tbody>
-              {books.map((b) => (
+              {sortedBooks.map((b) => (
                 <Tr key={b.id}>
                   <Td>{b.title}</Td>
                   <Td>{b.author || '-'}</Td>
                   <Td>{b.year || '-'}</Td>
                   <Td>{b.notes || '-'}</Td>
+                  <Td>{b.createdAt ? new Date(b.createdAt).toLocaleDateString() : '-'}</Td>
                   <Td textAlign="right">
-                    <IconButton aria-label="Edit" size="sm" mr={2} icon={<EditIcon />} onClick={() => openEdit(b)} />
-                    <IconButton aria-label="Delete" size="sm" colorScheme="red" icon={<DeleteIcon />} onClick={() => deleteMutation.mutate(b.id)} />
+                    <IconButton aria-label="Edit" size="sm" mr={2} variant="ghost" icon={<EditIcon />} onClick={() => openEdit(b)} />
+                    <IconButton aria-label="Delete" size="sm" variant="ghost" colorScheme="red" icon={<DeleteIcon />} onClick={() => deleteMutation.mutate(b.id)} />
                   </Td>
                 </Tr>
               ))}
             </Tbody>
           </Table>
+          )}
         </Box>
 
         <Modal isOpen={isOpen} onClose={onClose} isCentered>
