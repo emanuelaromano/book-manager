@@ -13,7 +13,8 @@ A full‑stack web app to manage your personal reading list. Create an account, 
 ### Run locally (root workflow)
 
 Prerequisites:
-- Node.js 18+ and npm
+- Node.js v22
+- npm 10.9.3
 - Docker (for Postgres)
 
 At repo root, run:
@@ -23,7 +24,7 @@ _Install dependencies for server and client_
 npm run deps
 ```
 
-_Create default env variables (keep -default flag for testing)_
+_Create default env variables_
 ```bash
 npm run envs -- -default
 ```
