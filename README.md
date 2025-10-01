@@ -17,39 +17,27 @@ Prerequisites:
 - Docker (for Postgres)
 
 At repo root, run:
+_Install dependencies for server and client_
 ```bash
-# install dependencies for server and client
 npm run deps
+```
 
-# create default env variables (keep -default flag for testing)
+_Create default env variables (keep -default flag for testing)_
+```bash
 npm run envs -- -default
+```
 
-# start Postgres via Docker
+_Start Postgres via Docker_
+```bash
 npm run db:up
+```
 
-# run backend and frontend together (two processes)
+_Run backend and frontend together (two processes)_
+```bash
 npm run dev
+```
 
-# stop and remove containers when done
+_Stop and remove containers when done_
+```bash
 npm run db:down
 ```
-
-Defaults and ports:
-- API: `http://localhost:4000` (Fastify)
-- Web: `http://localhost:5173` (Vite dev server)
-- DB: `postgres://postgres:postgres@127.0.0.1:5433/books_db`
-
-Environment variables:
-```bash
-PORT=4000
-CLIENT_ORIGIN=http://localhost:5173
-JWT_SECRET=<your-jwt-secret>
-POSTGRES_HOST=127.0.0.1
-POSTGRES_PORT=5433
-POSTGRES_DB=<your-db-name>
-POSTGRES_USER=<your-db-user>
-POSTGRES_PASSWORD=<your-db-password>
-SEQUELIZE_SYNC=true
-```
-Health check: `http://localhost:4000/api/health`
-
