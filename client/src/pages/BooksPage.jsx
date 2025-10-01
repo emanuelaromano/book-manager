@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Button,
@@ -29,6 +29,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { useNavigate } from 'react-router-dom';
+import Layout from '../components/Layout.jsx';
 
 async function fetchBooks() {
   const res = await fetch('/api/books', { credentials: 'include' });
@@ -143,76 +144,77 @@ export default function BooksPage() {
   }
 
   return (
-    <Container maxW="4xl" py={8}>
-      <Stack direction="row" justify="space-between" align="center" mb={6}>
-        <Heading>My Books</Heading>
-        <Stack direction="row">
-          <Button onClick={openCreate} colorScheme="blue">Add Book</Button>
-          <Button variant="outline" onClick={logout}>Logout</Button>
+    <Layout>
+      <Container maxW="5xl" py={10}>
+        <Stack direction="row" justify="space-between" align="center" mb={6}>
+          <Heading letterSpacing="-0.02em">My Books</Heading>
+          <Stack direction="row">
+            <Button onClick={openCreate} colorScheme="blue" rounded="full">Add Book</Button>
+          </Stack>
         </Stack>
-      </Stack>
-      <Box borderWidth="1px" rounded="lg" overflowX="auto">
-        <Table size="sm">
-          <Thead>
-            <Tr>
-              <Th>Title</Th>
-              <Th>Author</Th>
-              <Th>Year</Th>
-              <Th>Notes</Th>
-              <Th></Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {books.map((b) => (
-              <Tr key={b.id}>
-                <Td>{b.title}</Td>
-                <Td>{b.author || '-'}</Td>
-                <Td>{b.year || '-'}</Td>
-                <Td>{b.notes || '-'}</Td>
-                <Td textAlign="right">
-                  <IconButton aria-label="Edit" size="sm" mr={2} icon={<EditIcon />} onClick={() => openEdit(b)} />
-                  <IconButton aria-label="Delete" size="sm" colorScheme="red" icon={<DeleteIcon />} onClick={() => deleteMutation.mutate(b.id)} />
-                </Td>
+        <Box borderWidth="1px" rounded="xl" overflowX="auto" bg="white">
+          <Table size="sm">
+            <Thead bg="gray.50">
+              <Tr>
+                <Th>Title</Th>
+                <Th>Author</Th>
+                <Th>Year</Th>
+                <Th>Notes</Th>
+                <Th></Th>
               </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </Box>
+            </Thead>
+            <Tbody>
+              {books.map((b) => (
+                <Tr key={b.id}>
+                  <Td>{b.title}</Td>
+                  <Td>{b.author || '-'}</Td>
+                  <Td>{b.year || '-'}</Td>
+                  <Td>{b.notes || '-'}</Td>
+                  <Td textAlign="right">
+                    <IconButton aria-label="Edit" size="sm" mr={2} icon={<EditIcon />} onClick={() => openEdit(b)} />
+                    <IconButton aria-label="Delete" size="sm" colorScheme="red" icon={<DeleteIcon />} onClick={() => deleteMutation.mutate(b.id)} />
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Box>
 
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>{form.id ? 'Edit Book' : 'Add Book'}</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Stack spacing={3}>
-              <FormControl isRequired>
-                <FormLabel>Title</FormLabel>
-                <Input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
-              </FormControl>
-              <FormControl>
-                <FormLabel>Author</FormLabel>
-                <Input value={form.author} onChange={(e) => setForm((f) => ({ ...f, author: e.target.value }))} />
-              </FormControl>
-              <FormControl>
-                <FormLabel>Year</FormLabel>
-                <Input type="number" value={form.year} onChange={(e) => setForm((f) => ({ ...f, year: e.target.value }))} />
-              </FormControl>
-              <FormControl>
-                <FormLabel>Notes</FormLabel>
-                <Textarea value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
-              </FormControl>
-            </Stack>
-          </ModalBody>
-          <ModalFooter>
-            <Button mr={3} onClick={onClose}>Cancel</Button>
-            <Button colorScheme="blue" onClick={submit} isLoading={createMutation.isPending || updateMutation.isPending}>
-              {form.id ? 'Save' : 'Create'}
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </Container>
+        <Modal isOpen={isOpen} onClose={onClose} isCentered>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>{form.id ? 'Edit Book' : 'Add Book'}</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Stack spacing={3}>
+                <FormControl isRequired>
+                  <FormLabel>Title</FormLabel>
+                  <Input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Author</FormLabel>
+                  <Input value={form.author} onChange={(e) => setForm((f) => ({ ...f, author: e.target.value }))} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Year</FormLabel>
+                  <Input type="number" value={form.year} onChange={(e) => setForm((f) => ({ ...f, year: e.target.value }))} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Notes</FormLabel>
+                  <Textarea value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
+                </FormControl>
+              </Stack>
+            </ModalBody>
+            <ModalFooter>
+              <Button mr={3} onClick={onClose}>Cancel</Button>
+              <Button colorScheme="blue" onClick={submit} isLoading={createMutation.isPending || updateMutation.isPending}>
+                {form.id ? 'Save' : 'Create'}
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      </Container>
+    </Layout>
   );
 }
 
