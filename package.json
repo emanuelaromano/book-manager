@@ -1,0 +1,20 @@
+{
+    "name": "book-manager-server",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "main": "src/index.js",
+    "scripts": {
+      "deps": "npm install && npm --prefix server install && npm --prefix client install",
+      "envs": "node server/src/scripts/setup-env.js",
+      "db:up": "docker compose up -d postgres",
+      "db:down": "docker compose down",
+      "dev:client": "npm --prefix client run dev",
+      "dev:server": "npm --prefix server run dev",
+      "dev": "concurrently -n client,server -c auto \"npm run dev:client\" \"npm run dev:server\""
+    },
+    "devDependencies": {
+      "concurrently": "^9.0.1"
+    }
+  }
+  
