@@ -8,6 +8,7 @@ export function defineBookModel(sequelize) {
       title: { type: DataTypes.STRING, allowNull: false },
       author: { type: DataTypes.STRING, allowNull: true },
       year: { type: DataTypes.INTEGER, allowNull: true },
+      rating: { type: DataTypes.INTEGER, allowNull: true, validate: { min: 1, max: 5 } },
       notes: { type: DataTypes.TEXT, allowNull: true },
       userId: { type: DataTypes.INTEGER, allowNull: false }
     },

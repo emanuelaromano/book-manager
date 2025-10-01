@@ -26,7 +26,11 @@ import {
   useToast,
   Stack,
   Spinner,
-  Center
+  Center,
+  Slider,
+  SliderTrack,
+  SliderFilledTrack,
+  SliderThumb
 } from '@chakra-ui/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { DeleteIcon, EditIcon, TriangleDownIcon, TriangleUpIcon } from '@chakra-ui/icons';
@@ -41,8 +45,9 @@ async function fetchBooks() {
 
 export default function BooksPage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [form, setForm] = useState({ id: null, title: '', author: '', year: '', notes: '' });
+  const [form, setForm] = useState({ id: null, title: '', author: '', year: '', rating: '', notes: '' });
   const [sort, setSort] = useState({ key: null, dir: 'asc' });
+  const [filter, setFilter] = useState('');
   const toast = useToast();
   const qc = useQueryClient();
   const navigate = useNavigate();
@@ -79,6 +84,25 @@ export default function BooksPage() {
     });
     return copy;
   }, [books, sort]);
+
+  const displayedBooks = useMemo(() => {
+    const query = filter.trim().toLowerCase();
+    if (!query) return sortedBooks;
+    return sortedBooks.filter((b) => {
+      const title = (b.title || '').toLowerCase();
+      const author = (b.author || '').toLowerCase();
+      const notes = (b.notes || '').toLowerCase();
+      const year = b.year != null ? String(b.year) : '';
+      const rating = b.rating != null ? String(b.rating) : '';
+      return (
+        title.includes(query) ||
+        author.includes(query) ||
+        notes.includes(query) ||
+        year.includes(query) ||
+        rating.includes(query)
+      );
+    });
+  }, [sortedBooks, filter]);
 
   const createMutation = useMutation({
     mutationFn: async (payload) => {
@@ -154,11 +178,11 @@ export default function BooksPage() {
   });
 
   function openCreate() {
-    setForm({ id: null, title: '', author: '', year: '', notes: '' });
+    setForm({ id: null, title: '', author: '', year: '', rating: 3, notes: '' });
     onOpen();
   }
   function openEdit(book) {
-    setForm({ id: book.id, title: book.title, author: book.author || '', year: book.year || '', notes: book.notes || '' });
+    setForm({ id: book.id, title: book.title, author: book.author || '', year: book.year || '', rating: book.rating || 3, notes: book.notes || '' });
     onOpen();
   }
   async function submit() {
@@ -166,7 +190,7 @@ export default function BooksPage() {
       toast({ title: 'Title is required', status: 'warning' });
       return;
     }
-    const payload = { title: form.title.trim(), author: form.author || null, year: form.year ? Number(form.year) : null, notes: form.notes || null };
+    const payload = { title: form.title.trim(), author: form.author || null, year: form.year ? Number(form.year) : null, rating: form.rating ? Number(form.rating) : null, notes: form.notes || null };
     if (form.id) await updateMutation.mutateAsync({ id: form.id, ...payload });
     else await createMutation.mutateAsync(payload);
     onClose();
@@ -180,9 +204,9 @@ export default function BooksPage() {
   return (
     <Layout>
       <Container py={8}>
-        <Stack direction="row" justify="space-between" align="center" mb={4}>
+        <Stack direction="row" justify="space-between" align="center" mb={4} flexWrap="wrap" gap={3}>
           <Heading size="md" letterSpacing="-0.02em" color="gray.800">My Books</Heading>
-          <Stack direction="row">
+          <Stack direction="row" align="center" flexWrap="wrap" gap={2}>
             <Button onClick={openCreate}>Add Book</Button>
           </Stack>
         </Stack>
@@ -192,6 +216,17 @@ export default function BooksPage() {
               <Spinner />
             </Center>
           ) : (
+          <>
+          <Box p={3} borderBottom="1px" borderColor="gray.100" bg="white">
+            <Input
+              placeholder="Filter books..."
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              size="sm"
+              w="100%"
+              bg="white"
+            />
+          </Box>
           <Table size="sm" variant="notion">
             <Thead>
               <Tr>
@@ -210,6 +245,11 @@ export default function BooksPage() {
                     Year
                   </Button>
                 </Th>
+                <Th aria-sort={sort.key === 'rating' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+                  <Button variant="ghost" size="xs" onClick={() => toggleSort('rating')} rightIcon={sort.key === 'rating' ? (sort.dir === 'asc' ? <TriangleUpIcon /> : <TriangleDownIcon />) : undefined}>
+                    Rating
+                  </Button>
+                </Th>
                 <Th aria-sort={sort.key === 'notes' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
                   <Button variant="ghost" size="xs" onClick={() => toggleSort('notes')} rightIcon={sort.key === 'notes' ? (sort.dir === 'asc' ? <TriangleUpIcon /> : <TriangleDownIcon />) : undefined}>
                     Notes
@@ -224,21 +264,31 @@ export default function BooksPage() {
               </Tr>
             </Thead>
             <Tbody>
-              {sortedBooks.map((b) => (
-                <Tr key={b.id}>
-                  <Td>{b.title}</Td>
-                  <Td>{b.author || '-'}</Td>
-                  <Td>{b.year || '-'}</Td>
-                  <Td>{b.notes || '-'}</Td>
-                  <Td>{b.createdAt ? new Date(b.createdAt).toLocaleDateString() : '-'}</Td>
-                  <Td textAlign="right">
-                    <IconButton aria-label="Edit" size="sm" mr={2} variant="ghost" icon={<EditIcon />} onClick={() => openEdit(b)} />
-                    <IconButton aria-label="Delete" size="sm" variant="ghost" colorScheme="red" icon={<DeleteIcon />} onClick={() => deleteMutation.mutate(b.id)} />
+              {displayedBooks.length === 0 ? (
+                <Tr>
+                  <Td colSpan={7} textAlign="center" py={6} color="gray.500">
+                    No books added so far
                   </Td>
                 </Tr>
-              ))}
+              ) : (
+                displayedBooks.map((b) => (
+                  <Tr key={b.id}>
+                    <Td>{b.title}</Td>
+                    <Td>{b.author || '-'}</Td>
+                    <Td>{b.year || '-'}</Td>
+                    <Td>{b.rating != null ? '★'.repeat(b.rating) + '☆'.repeat(5 - b.rating) : '-'}</Td>
+                    <Td>{b.notes || '-'}</Td>
+                    <Td>{b.createdAt ? new Date(b.createdAt).toLocaleDateString() : '-'}</Td>
+                    <Td textAlign="right">
+                      <IconButton aria-label="Edit" size="sm" mr={2} variant="ghost" icon={<EditIcon />} onClick={() => openEdit(b)} />
+                      <IconButton aria-label="Delete" size="sm" variant="ghost" colorScheme="red" icon={<DeleteIcon />} onClick={() => deleteMutation.mutate(b.id)} />
+                    </Td>
+                  </Tr>
+                ))
+              )}
             </Tbody>
           </Table>
+          </>
           )}
         </Box>
 
@@ -260,6 +310,18 @@ export default function BooksPage() {
                 <FormControl>
                   <FormLabel>Year</FormLabel>
                   <Input type="number" value={form.year} onChange={(e) => setForm((f) => ({ ...f, year: e.target.value }))} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Rating</FormLabel>
+                  <Stack direction="row" align="center" spacing={4}>
+                    <Slider min={1} max={5} step={1} value={Number(form.rating) || 1} onChange={(val) => setForm((f) => ({ ...f, rating: val }))}>
+                      <SliderTrack>
+                        <SliderFilledTrack />
+                      </SliderTrack>
+                      <SliderThumb />
+                    </Slider>
+                    <Box w="10" textAlign="center">{form.rating || 1}</Box>
+                  </Stack>
                 </FormControl>
                 <FormControl>
                   <FormLabel>Notes</FormLabel>

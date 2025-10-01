@@ -13,7 +13,7 @@ export default function HomePage() {
               Your library, simply organized
             </Heading>
             <Text fontSize={{ base: 'lg', md: 'xl' }} color="gray.600" maxW="2xl">
-              A minimalist book manager inspired by Notion’s calm, focused workspace.
+              A great space to manage your books.
             </Text>
             <Stack direction={{ base: 'column', sm: 'row' }} spacing={4}>
               <Button as={Link} to="/books" size="lg">
