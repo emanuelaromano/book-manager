@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Box,
   Button,
@@ -24,11 +24,18 @@ import {
   Td,
   useDisclosure,
   useToast,
-  Stack
+  Stack,
+  Spinner,
+  Center,
+  Slider,
+  SliderTrack,
+  SliderFilledTrack,
+  SliderThumb
 } from '@chakra-ui/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { DeleteIcon, EditIcon, TriangleDownIcon, TriangleUpIcon } from '@chakra-ui/icons';
 import { useNavigate } from 'react-router-dom';
+import Layout from '../components/Layout.jsx';
 
 async function fetchBooks() {
   const res = await fetch('/api/books', { credentials: 'include' });
@@ -38,12 +45,64 @@ async function fetchBooks() {
 
 export default function BooksPage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [form, setForm] = useState({ id: null, title: '', author: '', year: '', notes: '' });
+  const [form, setForm] = useState({ id: null, title: '', author: '', year: '', rating: '', notes: '' });
+  const [sort, setSort] = useState({ key: null, dir: 'asc' });
+  const [filter, setFilter] = useState('');
   const toast = useToast();
   const qc = useQueryClient();
   const navigate = useNavigate();
 
   const { data: books = [], isLoading } = useQuery({ queryKey: ['books'], queryFn: fetchBooks });
+
+  function toggleSort(key) {
+    setSort((prev) => {
+      if (prev.key === key) {
+        return { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' };
+      }
+      return { key, dir: 'asc' };
+    });
+  }
+
+  const sortedBooks = useMemo(() => {
+    const copy = [...books];
+    if (!sort.key) return copy;
+    const { key, dir } = sort;
+    copy.sort((a, b) => {
+      const av = a[key];
+      const bv = b[key];
+      if (av == null && bv == null) return 0;
+      if (av == null) return dir === 'asc' ? 1 : -1;
+      if (bv == null) return dir === 'asc' ? -1 : 1;
+      if (typeof av === 'number' && typeof bv === 'number') {
+        return dir === 'asc' ? av - bv : bv - av;
+      }
+      const as = String(av).toLowerCase();
+      const bs = String(bv).toLowerCase();
+      if (as < bs) return dir === 'asc' ? -1 : 1;
+      if (as > bs) return dir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return copy;
+  }, [books, sort]);
+
+  const displayedBooks = useMemo(() => {
+    const query = filter.trim().toLowerCase();
+    if (!query) return sortedBooks;
+    return sortedBooks.filter((b) => {
+      const title = (b.title || '').toLowerCase();
+      const author = (b.author || '').toLowerCase();
+      const notes = (b.notes || '').toLowerCase();
+      const year = b.year != null ? String(b.year) : '';
+      const rating = b.rating != null ? String(b.rating) : '';
+      return (
+        title.includes(query) ||
+        author.includes(query) ||
+        notes.includes(query) ||
+        year.includes(query) ||
+        rating.includes(query)
+      );
+    });
+  }, [sortedBooks, filter]);
 
   const createMutation = useMutation({
     mutationFn: async (payload) => {
@@ -63,9 +122,9 @@ export default function BooksPage() {
       qc.setQueryData(['books'], (old = []) => [optimistic, ...old]);
       return { prev };
     },
-    onError: (_err, _vars, ctx) => {
+    onError: (err, _vars, ctx) => {
       if (ctx?.prev) qc.setQueryData(['books'], ctx.prev);
-      toast({ title: 'Create failed', status: 'error' });
+      toast({ title: err?.message || 'Create failed', status: 'error' });
     },
     onSuccess: () => {
       toast({ title: 'Book added', status: 'success' });
@@ -119,11 +178,11 @@ export default function BooksPage() {
   });
 
   function openCreate() {
-    setForm({ id: null, title: '', author: '', year: '', notes: '' });
+    setForm({ id: null, title: '', author: '', year: '', rating: 3, notes: '' });
     onOpen();
   }
   function openEdit(book) {
-    setForm({ id: book.id, title: book.title, author: book.author || '', year: book.year || '', notes: book.notes || '' });
+    setForm({ id: book.id, title: book.title, author: book.author || '', year: book.year || '', rating: book.rating || 3, notes: book.notes || '' });
     onOpen();
   }
   async function submit() {
@@ -131,7 +190,7 @@ export default function BooksPage() {
       toast({ title: 'Title is required', status: 'warning' });
       return;
     }
-    const payload = { title: form.title.trim(), author: form.author || null, year: form.year ? Number(form.year) : null, notes: form.notes || null };
+    const payload = { title: form.title.trim(), author: form.author || null, year: form.year ? Number(form.year) : null, rating: form.rating ? Number(form.rating) : null, notes: form.notes || null };
     if (form.id) await updateMutation.mutateAsync({ id: form.id, ...payload });
     else await createMutation.mutateAsync(payload);
     onClose();
@@ -143,76 +202,143 @@ export default function BooksPage() {
   }
 
   return (
-    <Container maxW="4xl" py={8}>
-      <Stack direction="row" justify="space-between" align="center" mb={6}>
-        <Heading>My Books</Heading>
-        <Stack direction="row">
-          <Button onClick={openCreate} colorScheme="blue">Add Book</Button>
-          <Button variant="outline" onClick={logout}>Logout</Button>
+    <Layout>
+      <Container py={8}>
+        <Stack direction="row" justify="space-between" align="center" mb={4} flexWrap="wrap" gap={3}>
+          <Heading size="md" letterSpacing="-0.02em" color="gray.800">My Books</Heading>
+          <Stack direction="row" align="center" flexWrap="wrap" gap={2}>
+            <Button onClick={openCreate}>Add Book</Button>
+          </Stack>
         </Stack>
-      </Stack>
-      <Box borderWidth="1px" rounded="lg" overflowX="auto">
-        <Table size="sm">
-          <Thead>
-            <Tr>
-              <Th>Title</Th>
-              <Th>Author</Th>
-              <Th>Year</Th>
-              <Th>Notes</Th>
-              <Th></Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {books.map((b) => (
-              <Tr key={b.id}>
-                <Td>{b.title}</Td>
-                <Td>{b.author || '-'}</Td>
-                <Td>{b.year || '-'}</Td>
-                <Td>{b.notes || '-'}</Td>
-                <Td textAlign="right">
-                  <IconButton aria-label="Edit" size="sm" mr={2} icon={<EditIcon />} onClick={() => openEdit(b)} />
-                  <IconButton aria-label="Delete" size="sm" colorScheme="red" icon={<DeleteIcon />} onClick={() => deleteMutation.mutate(b.id)} />
-                </Td>
+        <Box borderWidth="1px" rounded="md" overflowX="auto" bg="white" boxShadow="page">
+          {isLoading ? (
+            <Center py={10}>
+              <Spinner />
+            </Center>
+          ) : (
+          <>
+          <Box p={3} borderBottom="1px" borderColor="gray.100" bg="white">
+            <Input
+              placeholder="Filter books..."
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              size="sm"
+              w="100%"
+              bg="white"
+            />
+          </Box>
+          <Table size="sm" variant="notion">
+            <Thead>
+              <Tr>
+                <Th aria-sort={sort.key === 'title' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+                  <Button variant="ghost" size="xs" onClick={() => toggleSort('title')} rightIcon={sort.key === 'title' ? (sort.dir === 'asc' ? <TriangleUpIcon /> : <TriangleDownIcon />) : undefined}>
+                    Title
+                  </Button>
+                </Th>
+                <Th aria-sort={sort.key === 'author' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+                  <Button variant="ghost" size="xs" onClick={() => toggleSort('author')} rightIcon={sort.key === 'author' ? (sort.dir === 'asc' ? <TriangleUpIcon /> : <TriangleDownIcon />) : undefined}>
+                    Author
+                  </Button>
+                </Th>
+                <Th aria-sort={sort.key === 'year' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+                  <Button variant="ghost" size="xs" onClick={() => toggleSort('year')} rightIcon={sort.key === 'year' ? (sort.dir === 'asc' ? <TriangleUpIcon /> : <TriangleDownIcon />) : undefined}>
+                    Year
+                  </Button>
+                </Th>
+                <Th aria-sort={sort.key === 'rating' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+                  <Button variant="ghost" size="xs" onClick={() => toggleSort('rating')} rightIcon={sort.key === 'rating' ? (sort.dir === 'asc' ? <TriangleUpIcon /> : <TriangleDownIcon />) : undefined}>
+                    Rating
+                  </Button>
+                </Th>
+                <Th aria-sort={sort.key === 'notes' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+                  <Button variant="ghost" size="xs" onClick={() => toggleSort('notes')} rightIcon={sort.key === 'notes' ? (sort.dir === 'asc' ? <TriangleUpIcon /> : <TriangleDownIcon />) : undefined}>
+                    Notes
+                  </Button>
+                </Th>
+                <Th aria-sort={sort.key === 'createdAt' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+                  <Button variant="ghost" size="xs" onClick={() => toggleSort('createdAt')} rightIcon={sort.key === 'createdAt' ? (sort.dir === 'asc' ? <TriangleUpIcon /> : <TriangleDownIcon />) : undefined}>
+                    Added
+                  </Button>
+                </Th>
+                <Th></Th>
               </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </Box>
+            </Thead>
+            <Tbody>
+              {displayedBooks.length === 0 ? (
+                <Tr>
+                  <Td colSpan={7} textAlign="center" py={6} color="gray.500">
+                    No books added so far
+                  </Td>
+                </Tr>
+              ) : (
+                displayedBooks.map((b) => (
+                  <Tr key={b.id}>
+                    <Td>{b.title}</Td>
+                    <Td>{b.author || '-'}</Td>
+                    <Td>{b.year || '-'}</Td>
+                    <Td>{b.rating != null ? '★'.repeat(b.rating) + '☆'.repeat(5 - b.rating) : '-'}</Td>
+                    <Td>{b.notes || '-'}</Td>
+                    <Td>{b.createdAt ? new Date(b.createdAt).toLocaleDateString() : '-'}</Td>
+                    <Td textAlign="right">
+                      <IconButton aria-label="Edit" size="sm" mr={2} variant="ghost" icon={<EditIcon />} onClick={() => openEdit(b)} />
+                      <IconButton aria-label="Delete" size="sm" variant="ghost" colorScheme="red" icon={<DeleteIcon />} onClick={() => deleteMutation.mutate(b.id)} />
+                    </Td>
+                  </Tr>
+                ))
+              )}
+            </Tbody>
+          </Table>
+          </>
+          )}
+        </Box>
 
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>{form.id ? 'Edit Book' : 'Add Book'}</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Stack spacing={3}>
-              <FormControl isRequired>
-                <FormLabel>Title</FormLabel>
-                <Input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
-              </FormControl>
-              <FormControl>
-                <FormLabel>Author</FormLabel>
-                <Input value={form.author} onChange={(e) => setForm((f) => ({ ...f, author: e.target.value }))} />
-              </FormControl>
-              <FormControl>
-                <FormLabel>Year</FormLabel>
-                <Input type="number" value={form.year} onChange={(e) => setForm((f) => ({ ...f, year: e.target.value }))} />
-              </FormControl>
-              <FormControl>
-                <FormLabel>Notes</FormLabel>
-                <Textarea value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
-              </FormControl>
-            </Stack>
-          </ModalBody>
-          <ModalFooter>
-            <Button mr={3} onClick={onClose}>Cancel</Button>
-            <Button colorScheme="blue" onClick={submit} isLoading={createMutation.isPending || updateMutation.isPending}>
-              {form.id ? 'Save' : 'Create'}
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </Container>
+        <Modal isOpen={isOpen} onClose={onClose} isCentered>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>{form.id ? 'Edit Book' : 'Add Book'}</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Stack spacing={3}>
+                <FormControl isRequired>
+                  <FormLabel>Title</FormLabel>
+                  <Input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Author</FormLabel>
+                  <Input value={form.author} onChange={(e) => setForm((f) => ({ ...f, author: e.target.value }))} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Year</FormLabel>
+                  <Input type="number" value={form.year} onChange={(e) => setForm((f) => ({ ...f, year: e.target.value }))} />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Rating</FormLabel>
+                  <Stack direction="row" align="center" spacing={4}>
+                    <Slider min={1} max={5} step={1} value={Number(form.rating) || 1} onChange={(val) => setForm((f) => ({ ...f, rating: val }))}>
+                      <SliderTrack>
+                        <SliderFilledTrack />
+                      </SliderTrack>
+                      <SliderThumb />
+                    </Slider>
+                    <Box w="10" textAlign="center">{form.rating || 1}</Box>
+                  </Stack>
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Notes</FormLabel>
+                  <Textarea value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
+                </FormControl>
+              </Stack>
+            </ModalBody>
+            <ModalFooter>
+              <Button mr={3} onClick={onClose}>Cancel</Button>
+              <Button colorScheme="blue" onClick={submit} isLoading={createMutation.isPending || updateMutation.isPending}>
+                {form.id ? 'Save' : 'Create'}
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      </Container>
+    </Layout>
   );
 }
 

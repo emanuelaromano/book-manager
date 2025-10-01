@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Box, Button, Container, FormControl, FormLabel, Heading, Input, Stack, Text, useToast } from '@chakra-ui/react';
+import Layout from '../components/Layout.jsx';
 import { useNavigate } from 'react-router-dom';
 
 export default function AuthPage() {
@@ -33,32 +34,34 @@ export default function AuthPage() {
   }
 
   return (
-    <Container maxW="sm" py={16}>
-      <Stack spacing={6}>
-        <Heading textAlign="center">Book Manager</Heading>
-        <Box p={6} borderWidth="1px" rounded="lg">
-          <Stack spacing={4}>
-            <FormControl>
-              <FormLabel>Email</FormLabel>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </FormControl>
-            <FormControl>
-              <FormLabel>Password</FormLabel>
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            </FormControl>
-            <Button isLoading={loading} colorScheme="blue" onClick={submit}>
-              {mode === 'login' ? 'Login' : 'Register'}
-            </Button>
-            <Text textAlign="center">
-              {mode === 'login' ? 'No account?' : 'Have an account?'}{' '}
-              <Button variant="link" onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>
-                {mode === 'login' ? 'Register' : 'Login'}
+    <Layout>
+      <Container maxW="sm" py={16}>
+        <Stack spacing={6}>
+          <Heading textAlign="center">Welcome back</Heading>
+          <Box p={6} borderWidth="1px" rounded="xl" bg="white" shadow="sm">
+            <Stack spacing={4}>
+              <FormControl>
+                <FormLabel>Email</FormLabel>
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Password</FormLabel>
+                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+              </FormControl>
+              <Button isLoading={loading} colorScheme="blue" onClick={submit} rounded="full">
+                {mode === 'login' ? 'Sign in' : 'Create account'}
               </Button>
-            </Text>
-          </Stack>
-        </Box>
-      </Stack>
-    </Container>
+              <Text textAlign="center" color="gray.600">
+                {mode === 'login' ? 'No account?' : 'Have an account?'}{' '}
+                <Button variant="link" onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>
+                  {mode === 'login' ? 'Register' : 'Login'}
+                </Button>
+              </Text>
+            </Stack>
+          </Box>
+        </Stack>
+      </Container>
+    </Layout>
   );
 }
 
