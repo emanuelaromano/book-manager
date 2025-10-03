@@ -93,6 +93,7 @@ export default function AuthPage() {
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)} 
                   required 
+                  autoComplete="email"
                 />
               </FormControl>
               <FormControl>
@@ -105,6 +106,7 @@ export default function AuthPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required 
                     minLength={6} 
+                    autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                   />
                   <InputRightElement>
                     <IconButton
@@ -128,6 +130,7 @@ export default function AuthPage() {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required 
                       minLength={6}
+                      autoComplete="new-password"
                     />
                     <InputRightElement>
                       <IconButton

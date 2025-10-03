@@ -387,16 +387,16 @@ export default function BooksPage() {
               <Stack spacing={3}>
                 <FormControl isRequired>
                   <FormLabel htmlFor="title">Title</FormLabel>
-                  <Input id="title" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
+                  <Input id="title" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} autoComplete="off" />
                 </FormControl>
                 <FormControl>
                   <FormLabel htmlFor="author">Author</FormLabel>
-                  <Input id="author" value={form.author} onChange={(e) => setForm((f) => ({ ...f, author: e.target.value }))} />
+                  <Input id="author" value={form.author} onChange={(e) => setForm((f) => ({ ...f, author: e.target.value }))} autoComplete="off" />
                 </FormControl>
                 <Stack direction="row" spacing={4}>
                   <FormControl flex={1}>
                     <FormLabel htmlFor="year">Year</FormLabel>
-                    <Input id="year" type="number" max={new Date().getFullYear()} value={form.year} onChange={(e) => setForm((f) => ({ ...f, year: e.target.value }))} />
+                    <Input id="year" type="number" max={new Date().getFullYear()} value={form.year} onChange={(e) => setForm((f) => ({ ...f, year: e.target.value }))} autoComplete="off" />
                   </FormControl>
                   <FormControl flex={1}>
                     <FormLabel>Rating</FormLabel>
@@ -408,15 +408,15 @@ export default function BooksPage() {
                 </Stack>
                 <FormControl>
                   <FormLabel htmlFor="notes">Notes</FormLabel>
-                  <Textarea id="notes" value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
+                  <Textarea id="notes" value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} autoComplete="off" />
                 </FormControl>
                 <FormControl>
                   <FormLabel htmlFor="synopsis">Synopsis</FormLabel>
-                  <Textarea id="synopsis" value={form.synopsis} onChange={(e) => setForm((f) => ({ ...f, synopsis: e.target.value }))} />
+                  <Textarea id="synopsis" value={form.synopsis} onChange={(e) => setForm((f) => ({ ...f, synopsis: e.target.value }))} autoComplete="off" />
                 </FormControl>
                 <FormControl>
                   <FormLabel htmlFor="imageUrl">Book Cover Image URL</FormLabel>
-                  <Input id="imageUrl" type="url" value={form.imageUrl} onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))} placeholder="https://example.com/book-cover.jpg" />
+                  <Input id="imageUrl" type="url" value={form.imageUrl} onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))} placeholder="https://example.com/book-cover.jpg" autoComplete="off" />
                 </FormControl>
                 <FormControl>
                   <Stack direction="row" align="flex-start" justify="space-between">
