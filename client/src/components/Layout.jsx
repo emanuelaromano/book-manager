@@ -55,7 +55,10 @@ export default function Layout({ children, mainProps = {} }) {
                 </>
               )}
               {(isAuthPage || isAuthenticated === false) && (
-                <Button size="sm" as={Link} to="/auth">Enter</Button>
+                <>
+                  <Button size="sm" as={Link} to="/auth?mode=login">Log In</Button>
+                  <Button size="sm" as={Link} to="/auth?mode=register" variant="outline">Register</Button>
+                </>
               )}
             </HStack>
           </Flex>
