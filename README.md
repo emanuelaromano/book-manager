@@ -9,7 +9,7 @@ A full‑stack web app to manage your personal reading list. Create an account, 
 - **Ratings and notes**: Optional 1–5 rating and free‑form notes
 - **Modern UI**: React + Chakra UI with responsive layout
 
-## 🎥 Demo
+### Demo
 
 📹 **[Watch Demo Video](https://drive.google.com/file/d/1T-pyFP07RgxFXkv3MY5kTJ6_czevPZUp/view?usp=sharing)**
 
