@@ -12,9 +12,9 @@ A full‑stack web app to manage your personal reading list. Create an account, 
 
 ### Run locally (root workflow)
 
-Prerequisites:
+Tested with:
 - Node.js v22
-- npm 10.9.3
+- npm 11.6.1
 - Docker (for Postgres)
 
 #### Quick Setup (Recommended)
