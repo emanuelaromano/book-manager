@@ -17,7 +17,19 @@ Prerequisites:
 - npm 10.9.3
 - Docker (for Postgres)
 
-At repo root, run:
+#### Quick Setup (Recommended)
+
+Make the setup script executable and run it:
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+This will install dependencies, create environment variables, start the database, and provide instructions for running the app.
+
+#### Manual Setup
+
+If you prefer to run each step manually:
 
 _Install dependencies for server and client_
 ```bash
