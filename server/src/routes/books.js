@@ -12,7 +12,7 @@ export default async function booksRoutes(app) {
 
   app.post('/', async (request, reply) => {
     const userId = request.user.sub;
-    const { title, author, year, rating, notes } = request.body || {};
+    const { title, author, year, rating, notes, synopsis, isRead, imageUrl } = request.body || {};
     if (!title) return reply.code(400).send({ message: 'Title is required' });
     if (year != null) {
       const numericYear = Number(year);
@@ -40,20 +40,23 @@ export default async function booksRoutes(app) {
       return reply.code(400).send({ message: 'Rating must be an integer between 1 and 5' });
     }
 
-    const book = await models.Book.create({ title, author: normalizedAuthor ?? null, year: year ?? null, rating: nextRating, notes, userId });
+    const book = await models.Book.create({ title, author: normalizedAuthor ?? null, year: year ?? null, rating: nextRating, notes, synopsis, isRead: isRead ?? false, imageUrl, userId });
     return book;
   });
 
   app.put('/:id', async (request, reply) => {
     const userId = request.user.sub;
     const { id } = request.params;
-    const { title, author, year, rating, notes } = request.body || {};
+    const { title, author, year, rating, notes, synopsis, isRead, imageUrl } = request.body || {};
     const book = await models.Book.findByPk(id);
     if (!book || book.userId !== userId) return reply.code(404).send({ message: 'Not found' });
     if (title === '') return reply.code(400).send({ message: 'Title cannot be empty' });
     const nextTitle = title ?? book.title;
     const nextAuthorRaw = author === undefined ? book.author : author;
     const nextYear = year === undefined ? book.year : year;
+    const nextSynopsis = synopsis === undefined ? book.synopsis : synopsis;
+    const nextIsRead = isRead === undefined ? book.isRead : isRead;
+    const nextImageUrl = imageUrl === undefined ? book.imageUrl : imageUrl;
     if (nextYear != null) {
       const numericYear = Number(nextYear);
       const currentYear = new Date().getFullYear();
@@ -85,7 +88,7 @@ export default async function booksRoutes(app) {
       if (dup) return reply.code(409).send({ message: 'A book with the same title, author, and year already exists.' });
     }
 
-    await book.update({ title: nextTitle, author: nextAuthor, year: nextYear, rating: nextRating, notes });
+    await book.update({ title: nextTitle, author: nextAuthor, year: nextYear, rating: nextRating, notes, synopsis: nextSynopsis, isRead: nextIsRead, imageUrl: nextImageUrl });
     return book;
   });
 

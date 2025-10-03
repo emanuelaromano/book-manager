@@ -23,8 +23,8 @@ async function buildServer() {
     hook: 'onRequest'
   });
   await app.register(jwt, {
-    secret: process.env.JWT_SECRET || 'dev-secret',
-    sign: { expiresIn: process.env.JWT_EXPIRES_IN || '7d' },
+    secret: process.env.JWT_SECRET,
+    sign: { expiresIn: process.env.JWT_EXPIRES_IN},
     cookie: {
       cookieName: 'token',
       signed: false

@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { ChakraProvider } from '@chakra-ui/react';
+import { ChakraProvider, Spinner, Center } from '@chakra-ui/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createBrowserRouter, RouterProvider, redirect } from 'react-router-dom';
 import AuthPage from './pages/AuthPage.jsx';
@@ -12,6 +12,14 @@ import theme from './theme.js';
 
 const queryClient = new QueryClient();
 
+function HydrateFallback() {
+  return (
+    <Center h="100vh">
+      <Spinner size="xl" />
+    </Center>
+  );
+}
+
 async function requireAuth() {
   const res = await fetch('/api/auth/me', { credentials: 'include' });
   if (!res.ok) throw redirect('/auth');
@@ -21,9 +29,15 @@ async function requireAuth() {
 const router = createBrowserRouter([
   { path: '/', element: <HomePage />, errorElement: <ErrorPage /> },
   { path: '/auth', element: <AuthPage />, errorElement: <ErrorPage /> },
-  { path: '/books', element: <BooksPage />, loader: requireAuth, errorElement: <ErrorPage /> },
+  { path: '/books', element: <BooksPage />, loader: requireAuth, errorElement: <ErrorPage />, HydrateFallback: HydrateFallback },
   { path: '*', element: <NotFoundPage /> }
-]);
+], {
+  future: {
+    v7_fetcherPersist: true,
+    v7_normalizeFormMethod: true,
+    v7_partialHydration: true,
+  }
+});
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

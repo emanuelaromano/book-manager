@@ -27,7 +27,9 @@ export default function AuthPage() {
         throw new Error(err.message || 'Request failed');
       }
       toast({ title: mode === 'login' ? 'Logged in' : 'Registered', status: 'success' });
-      navigate('/books');
+      setTimeout(() => {
+        navigate('/books');
+      }, 100);
     } catch (e) {
       toast({ title: 'Error', description: e.message, status: 'error' });
     } finally {
@@ -43,13 +45,14 @@ export default function AuthPage() {
           <Box p={6} borderWidth="1px" rounded="xl" bg="white" shadow="sm">
             <Stack spacing={4}>
               <FormControl>
-                <FormLabel>Email</FormLabel>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                <FormLabel htmlFor="email">Email</FormLabel>
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </FormControl>
               <FormControl>
-                <FormLabel>Password</FormLabel>
+                <FormLabel htmlFor="password">Password</FormLabel>
                 <InputGroup>
                   <Input 
+                    id="password"
                     type={showPassword ? 'text' : 'password'} 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
